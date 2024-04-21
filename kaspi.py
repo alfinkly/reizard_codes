@@ -16,7 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Настройка подключения к MongoDB
-client = MongoClient('mongodb+srv://umirzakdukenbaev:1@cluster0.jc3lw.mongodb.net/')
+client = MongoClient('localhost', 27017)
 db = client['ARBKLE']
 collection = db['KASPI']
 

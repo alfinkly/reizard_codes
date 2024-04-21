@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 TOKEN = '6752451387:AAFabdJ8glHI6iK46hPd9-CZV4PHdKS2RBY'
-MONGO_URI = 'mongodb+srv://umirzakdukenbaev:1@cluster0.jc3lw.mongodb.net/'
+MONGO_URI = 'localhost'
 DATABASE_NAME = 'ARBKLE'
 ADMIN_CHAT_ID = '5149601388'  # ID вашего чата с ботом для уведомлений
 bot = Bot(token=TOKEN)

@@ -24,7 +24,7 @@ chrome_options.add_argument('--disable-dev-shm-usage')  # Обход огран�
 driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
 # Подключение к MongoDB
-client = MongoClient('mongodb+srv://umirzakdukenbaev:1@cluster0.jc3lw.mongodb.net/')
+client = MongoClient('localhost', 27017)
 db = client['ARBKLE']
 collection = db['ARBUZ']
 
