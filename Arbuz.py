@@ -2,7 +2,6 @@ import base64
 import logging
 import time
 from datetime import datetime
-
 import requests
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
@@ -40,7 +39,7 @@ geckodriver_path = '/usr/local/bin/geckodriver'
 service = Service(executable_path=geckodriver_path)
 # Создание экземпляра драйвера Firefox
 driver = webdriver.Firefox(service=service, options=options)
-
+logging.basicConfig(level=logging.INFO)
 def download_image(image_url):
     if not image_url or image_url == 'null':
         return None
