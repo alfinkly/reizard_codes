@@ -82,9 +82,15 @@ def parse_category(driver, category_url, category_name):
         link = product_element.get('href') if product_element else "Link not found"
         price_element = card.find('span', class_='price--wrapper')
         price = price_element.text.strip() if price_element else "Price not found"
-
         current_time = datetime.now().strftime("%d.%m.%Y %H.%M")
-
+        print({
+                'name': title,
+                'price': price,
+                'image_url': image_url,
+                'category': category_name,
+                'link': link,
+                'parsed_time': current_time
+            })
         # Вставка или обновление данных в MongoDB
         collection.update_one(
             {'link': link},
