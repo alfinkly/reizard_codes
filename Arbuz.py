@@ -1,4 +1,5 @@
 import base64
+import logging
 import time
 from datetime import datetime
 
@@ -121,9 +122,11 @@ categories = [
 # Бесконечный цикл для перезапуска парсинга
 while True:
     try:
+        logging.info("Старт Парс")
         for base_url, max_page, category_name in categories:
             base_url_template = base_url + '#/?%5B%7B%22slug%22%3A%22page%22,%22value%22%3A{}%2C%22component%22%3A%22pagination%22%7D%5D'
             for page_number in range(1, max_page + 1):
+                logging.info("Старт юрл")
                 page_url = base_url_template.format(page_number)
 
                 # Переход на страницу.
@@ -133,16 +136,19 @@ while True:
                 # Принудительное выполнение перезагрузки страницы с помощью JavaScript.
                 driver.execute_script("window.location.reload();")
                 try:
+                    logging.info("Получение страницы")
                     main_page = driver.window_handles[0]
                     driver.switch_to.window(main_page)
                     WebDriverWait(driver, 300).until(
                         EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'article.product-item.product-card'))
                     )
+                    logging.info("Парс категории в странице")
                     # Парсинг страницы после полной загрузки.
                     parse_category(driver, page_url, category_name)
+                    logging.info("Конец парса")
                 except TimeoutException:
                     continue
-
+        logging.info("Сон 300сек")
         time.sleep(300)  # Задержка перед началом нового цикла парсинга.
     except Exception:
-        pass
+        logging.info("ОШИБКА")
