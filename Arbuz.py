@@ -7,27 +7,38 @@ from bs4 import BeautifulSoup
 from pymongo import MongoClient
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
-
-# Настройка опций Chrome для работы в headless режиме
-chrome_options = Options()
-chrome_options.add_argument("--headless")  # Добавление опции для запуска в фоновом режиме
-chrome_options.add_argument('--no-sandbox')  # Опция для запуска в контейнере или некоторых серверах
-chrome_options.add_argument('--disable-dev-shm-usage')  # Обход ограничений на использование памяти
-
-# Инициализация драйвера WebDriver с добавленными опциями
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
+from selenium.webdriver.firefox.service import Service
 
 # Подключение к MongoDB
 client = MongoClient('localhost', 27017)
 db = client['ARBKLE']
 collection = db['ARBUZ']
 
+# Настройка опций Chrome для работы в headless режиме
+#chrome_options = Options()
+#chrome_options.add_argument("--headless")  # Добавление опции для запуска в фоновом режиме
+#chrome_options.add_argument('--no-sandbox')  # Опция для запуска в контейнере или некоторых серверах
+# chrome_options.add_argument('--disable-dev-shm-usage')  # Обход ограничений на использование памяти
+#chrome_options.add_argument("--remote-debugging-port=9224")
+# Инициализация драйвера WebDriver с добавленными опциями
+#chrome_options.add_argument("--disable-gpu")
+#driver = webdriver.Chrome(options=chrome_options)
+
+options = Options()
+options.add_argument("--headless")
+options.headless = True  # Добавление опции для запуска в фоновом режиме
+geckodriver_path = '/usr/local/bin/geckodriver'
+service = Service(executable_path=geckodriver_path)
+# Создание экземпляра драйвера Firefox
+driver = webdriver.Firefox(service=service, options=options)
 
 def download_image(image_url):
     if not image_url or image_url == 'null':
@@ -48,7 +59,7 @@ def parse_category(driver, category_url, category_name):
     # Явное ожидание, чтобы убедиться, что элементы страницы загрузились
     try:
         # Ожидание появления элемента с классом product-card на странице
-        WebDriverWait(driver, 20).until(
+        WebDriverWait(driver, 300).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'article.product-item.product-card'))
         )
     except TimeoutException:
@@ -109,24 +120,29 @@ categories = [
 
 # Бесконечный цикл для перезапуска парсинга
 while True:
-    for base_url, max_page, category_name in categories:
-        base_url_template = base_url + '#/?%5B%7B%22slug%22%3A%22page%22,%22value%22%3A{}%2C%22component%22%3A%22pagination%22%7D%5D'
-        for page_number in range(1, max_page + 1):
-            page_url = base_url_template.format(page_number)
+    try:
+        for base_url, max_page, category_name in categories:
+            base_url_template = base_url + '#/?%5B%7B%22slug%22%3A%22page%22,%22value%22%3A{}%2C%22component%22%3A%22pagination%22%7D%5D'
+            for page_number in range(1, max_page + 1):
+                page_url = base_url_template.format(page_number)
 
-            # Переход на страницу.
-            driver.get(page_url)
-            time.sleep(2)  # Кратковременная пауза.
+                # Переход на страницу.
+                driver.get(page_url)
+                time.sleep(20)  # Кратковременная пауза.
 
-            # Принудительное выполнение перезагрузки страницы с помощью JavaScript.
-            driver.execute_script("window.location.reload();")
-            try:
-                WebDriverWait(driver, 20).until(
-                    EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'article.product-item.product-card'))
-                )
-                # Парсинг страницы после полной загрузки.
-                parse_category(driver, page_url, category_name)
-            except TimeoutException:
-                continue
+                # Принудительное выполнение перезагрузки страницы с помощью JavaScript.
+                driver.execute_script("window.location.reload();")
+                try:
+                    main_page = driver.window_handles[0]
+                    driver.switch_to.window(main_page)
+                    WebDriverWait(driver, 300).until(
+                        EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'article.product-item.product-card'))
+                    )
+                    # Парсинг страницы после полной загрузки.
+                    parse_category(driver, page_url, category_name)
+                except TimeoutException:
+                    continue
 
-    time.sleep(300)  # Задержка перед началом нового цикла парсинга.
+        time.sleep(300)  # Задержка перед началом нового цикла парсинга.
+    except Exception:
+        pass
