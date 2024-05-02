@@ -25,7 +25,6 @@ client = MongoClient('localhost', 27017)
 db = client['ARBKLE']
 collection = db['KLEVER']
 category_urls = [
-
     'https://clevermarket.kz/supermarket/catalog/Ovoshchi-zelen-gribi-solenya/1089',
     'https://clevermarket.kz/supermarket/catalog/Frukti-yagodi/1090',
     'https://clevermarket.kz/supermarket/catalog/Molochnie-produkti-yaitso/1118',
